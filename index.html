@@ -3,172 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Node Status | Foza</title>
+  <title>Xray Status | Foza</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg-main: #020617;
-      --card-bg: rgba(30, 41, 59, 0.45);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --item-bg: rgba(15, 23, 42, 0.6);
-      --item-hover: rgba(30, 41, 59, 0.9);
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --success: #10b981;
-      --error: #ef4444;
-      --warning: #f59e0b;
-      --accent: #3b82f6;
-    }
-
+    :root { --bg-main: #020617; --card-bg: rgba(30, 41, 59, 0.45); --card-border: rgba(255, 255, 255, 0.08); --item-bg: rgba(15, 23, 42, 0.6); --text-primary: #f8fafc; --text-secondary: #94a3b8; --accent: #3b82f6; --success: #10b981; --error: #ef4444; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: radial-gradient(circle at top right, #1e1b4b, var(--bg-main) 40%);
-      color: var(--text-primary);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      overflow-x: hidden;
-    }
-
-    .dashboard {
-      width: 100%;
-      max-width: 500px;
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
-      padding: 32px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.1);
-      position: relative;
-      z-index: 1;
-    }
-
-    .header { text-align: center; margin-bottom: 32px; }
-    .header h1 {
-      font-size: 26px; font-weight: 700;
-      background: linear-gradient(135deg, #60a5fa, #a855f7);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
-    }
-    .header p { font-size: 14px; color: var(--text-secondary); }
-
+    body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top right, #1e1b4b, var(--bg-main) 40%); color: var(--text-primary); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+    .dashboard { width: 100%; max-width: 500px; background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--card-border); border-radius: 24px; padding: 32px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
+    .header { text-align: center; margin-bottom: 24px; }
+    .header h1 { font-size: 26px; font-weight: 700; background: linear-gradient(135deg, #60a5fa, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .uptime { font-size: 13px; color: var(--accent); font-weight: 500; margin-top: 8px; }
     .node-list { display: flex; flex-direction: column; gap: 14px; }
-
-    /* Card sekarang bisa diklik (Pointer) */
-    .node-card {
-      background: var(--item-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 18px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
-    .node-card:hover {
-      transform: translateY(-3px) scale(1.01);
-      background: var(--item-hover);
-      border-color: rgba(96, 165, 250, 0.4);
-      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.5);
-    }
-
-    .node-info { display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
-    .node-name { font-size: 15px; font-weight: 600; }
-    .node-meta { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
-    .ping-icon { width: 14px; height: 14px; opacity: 0.7; }
-
-    .status-badge {
-      display: flex; align-items: center; gap: 8px;
-      padding: 6px 12px; border-radius: 30px;
-      font-size: 13px; font-weight: 600; text-transform: uppercase;
-      pointer-events: none;
-    }
-
-    .checking { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); color: var(--warning); }
-    .online { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--success); }
-    .offline { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--error); }
-
-    .dot { width: 8px; height: 8px; border-radius: 50%; }
-    .dot-checking { background-color: var(--warning); animation: pulse-yellow 1.5s infinite; }
-    .dot-online { background-color: var(--success); box-shadow: 0 0 10px var(--success); animation: pulse-green 2s infinite; }
-    .dot-offline { background-color: var(--error); }
-
-    @keyframes pulse-green {
-      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-      70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
-    @keyframes pulse-yellow { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-    .footer { margin-top: 32px; text-align: center; font-size: 12px; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; }
-
-    /* --- MODAL (POPUP) STYLES --- */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      display: flex; justify-content: center; align-items: center;
-      opacity: 0; visibility: hidden;
-      transition: all 0.3s ease;
-      z-index: 100;
-      padding: 20px;
-    }
-    .modal-overlay.active { opacity: 1; visibility: visible; }
-
-    .modal-box {
-      background: #0f172a;
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      width: 100%; max-width: 450px;
-      padding: 24px;
-      transform: translateY(20px) scale(0.95);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
-    }
-    .modal-overlay.active .modal-box { transform: translateY(0) scale(1); }
-
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .modal-title { font-size: 18px; font-weight: 600; }
-    .btn-close {
-      background: transparent; border: none; color: var(--text-secondary);
-      cursor: pointer; font-size: 24px; line-height: 1; transition: color 0.2s;
-    }
-    .btn-close:hover { color: var(--error); }
-
-    .config-box {
-      background: #020617; border: 1px solid var(--card-border);
-      border-radius: 12px; padding: 14px;
-      font-family: monospace; font-size: 12px; color: #a5b4fc;
-      word-break: break-all; white-space: pre-wrap;
-      max-height: 150px; overflow-y: auto; margin-bottom: 20px;
-    }
-
-    .modal-actions { display: flex; gap: 12px; }
-    .btn-copy, .btn-close-modal {
-      flex: 1; padding: 12px; border-radius: 10px; border: none;
-      font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-    }
-    .btn-copy { background: var(--accent); color: white; }
-    .btn-copy:hover { background: #2563eb; }
-    .btn-close-modal { background: rgba(255,255,255,0.1); color: white; }
-    .btn-close-modal:hover { background: rgba(255,255,255,0.2); }
-
-    /* TOAST NOTIFIKASI */
-    .toast {
-      position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%);
-      background: var(--success); color: white; padding: 10px 24px;
-      border-radius: 30px; font-size: 14px; font-weight: 500;
-      transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 200; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
-    }
-    .toast.show { bottom: 40px; }
+    .node-card { background: var(--item-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+    .node-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+    .online { color: var(--success); } .offline { color: var(--error); }
+    .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; opacity:0; visibility:hidden; transition:0.3s; }
+    .modal-overlay.active { opacity:1; visibility:visible; }
+    .modal-box { background:#0f172a; padding:24px; border-radius:20px; width:90%; max-width:400px; }
+    .config-box { background:#020617; padding:12px; font-family:monospace; font-size:12px; color:#a5b4fc; word-break:break-all; border-radius:8px; margin:15px 0; max-height:100px; overflow-y:auto; }
   </style>
 </head>
 <body>
@@ -176,160 +29,76 @@
   <div class="dashboard">
     <div class="header">
       <h1>Xray Node Status</h1>
-      <p>Ketuk server untuk menyalin link VLESS</p>
+      <div class="uptime" id="uptime">Uptime: 00:00:00</div>
     </div>
-    <div class="node-list" id="server-container">
-      </div>
-    <div class="footer" id="time-footer">Menghubungkan ke server...</div>
+    <div class="node-list" id="server-container"></div>
+    <div class="footer" style="text-align:center; margin-top:20px; font-size:12px; color:#666;" id="time-footer">Syncing...</div>
   </div>
 
   <div class="modal-overlay" id="configModal">
     <div class="modal-box">
-      <div class="modal-header">
-        <div class="modal-title" id="modalTitle">Nama Server</div>
-        <button class="btn-close" onclick="closeModal()">&times;</button>
-      </div>
-      <div class="config-box" id="configText">vless://...</div>
-      <div class="modal-actions">
-        <button class="btn-close-modal" onclick="closeModal()">Batal</button>
-        <button class="btn-copy" onclick="copyConfig()">Salin VLESS</button>
-      </div>
+      <div id="modalTitle" style="font-weight:600">Nama Server</div>
+      <div class="config-box" id="configText"></div>
+      <button style="width:100%; padding:10px; border-radius:8px; border:none; background:#3b82f6; color:#fff; cursor:pointer" onclick="copyConfig()">Salin Link VLESS</button>
     </div>
   </div>
 
-  <div class="toast" id="toast">Berhasil disalin!</div>
-
   <script>
-    // 1. DAFTAR SELURUH SERVER DARI CONFIG CLASH ANDA
     const servers = [
-      { 
-        id: "jp-rotasi", 
-        name: "🇯🇵 Worker VPN JP (Rotasi)", 
-        url: "https://vpn.foza.biz.id",
-        vless: "vless://673d0bcb-a575-4a91-825c-f3252f8c7e3b@104.18.95.0:2083?path=%2F&security=tls&encryption=none&host=vpn.foza.biz.id&fp=chrome&type=ws&sni=vpn.foza.biz.id#Worker%20VPN%20JP%20(Rotasi)"
-      },
-      { 
-        id: "sg-rotasi", 
-        name: "🇸🇬 Worker VPN SG (Rotasi)", 
-        url: "https://vpn.foza.biz.id",
-        vless: "vless://673d0bcb-a575-4a91-825c-f3252f8c7e3b@172.67.66.234:443?path=%2F&security=tls&encryption=none&host=vpn.foza.biz.id&fp=chrome&type=ws&sni=vpn.foza.biz.id#Worker%20VPN%20SG%20(Rotasi)"
-      },
-      { 
-        id: "id-pmi", 
-        name: "🇮🇩 PT Pusat Media Indonesia", 
-        url: "https://xray.foza.biz.id",
-        vless: "vless://fc60147e-76b8-4bc5-b691-90b2da79e3d2@104.18.2.1:80?path=%2F103.6.207.108-8080&security=none&encryption=none&host=xray.foza.biz.id&type=ws#PT%20Pusat%20Media%20Indonesia%20-%20ID"
-      },
-      { 
-        id: "sg-oracle", 
-        name: "🇸🇬 Oracle Public Cloud", 
-        url: "https://xray.foza.biz.id",
-        vless: "vless://fc60147e-76b8-4bc5-b691-90b2da79e3d2@172.67.73.39:80?path=%2F168.138.165.174-443&security=none&encryption=none&host=xray.foza.biz.id&type=ws#Oracle%20Public%20Cloud%20-%20SG"
-      },
-      { 
-        id: "sg-ali", 
-        name: "🇸🇬 Alibaba Cloud", 
-        url: "https://xray.foza.biz.id",
-        vless: "vless://fc60147e-76b8-4bc5-b691-90b2da79e3d2@172.67.73.39:80?path=%2F47.74.254.191-8900&security=none&encryption=none&host=xray.foza.biz.id&type=ws#Alibaba%20Cloud%20-%20SG"
-      }
+      { id: "jp", name: "🇯🇵 Worker VPN JP", url: "https://vpn.foza.biz.id", vless: "vless://673d0bcb-a575-4a91-825c-f3252f8c7e3b@104.18.95.0:2083/?type=ws&security=tls&encryption=none&host=vpn.foza.biz.id&path=%2F#Worker%20VPN%20JP" },
+      { id: "id", name: "🇮🇩 PT Pusat Media Indonesia", url: "https://xray.foza.biz.id", vless: "vless://fc60147e-76b8-4bc5-b691-90b2da79e3d2@104.18.2.1:80/?type=ws&encryption=none&host=xray.foza.biz.id&path=%2F103.6.207.108-8080#PT%20Pusat%20Media%20Indonesia" }
     ];
 
+    // Uptime Logic
+    const startTime = Date.now();
+    function updateUptime() {
+      const diff = new Date(Date.now() - startTime);
+      document.getElementById('uptime').innerText = `Uptime: ${String(diff.getUTCHours()).padStart(2,'0')}:${String(diff.getUTCMinutes()).padStart(2,'0')}:${String(diff.getUTCSeconds()).padStart(2,'0')}`;
+    }
+    setInterval(updateUptime, 1000);
+
+    // Render & Ping Logic
     const container = document.getElementById('server-container');
-    const timeFooter = document.getElementById('time-footer');
-    let currentConfigToCopy = ""; // Menyimpan config yang sedang dibuka
+    servers.forEach((s, i) => {
+      container.innerHTML += `<div class="node-card" onclick="openModal(${i})">
+        <div><strong>${s.name}</strong><div id="ping-${s.id}" style="font-size:12px; color:#888">Checking...</div></div>
+        <div class="status-badge" id="badge-${s.id}">...</div>
+      </div>`;
+    });
 
-    // 2. INIT UI (Tampilan Awal)
-    function initUI() {
-      servers.forEach((server, index) => {
-        container.innerHTML += `
-          <div class="node-card" id="card-${server.id}" onclick="openModal(${index})">
-            <div class="node-info">
-              <span class="node-name">${server.name}</span>
-              <span class="node-meta" id="ping-${server.id}">
-                <svg class="ping-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Menunggu...
-              </span>
-            </div>
-            <div class="status-badge checking" id="badge-${server.id}">
-              <div class="dot dot-checking"></div> CEK
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    // 3. FUNGSI PING (REALTIME)
-    async function checkServers() {
-      // Loop semua server untuk dicek
-      for (const server of servers) {
+    async function check() {
+      for (const s of servers) {
         const start = Date.now();
-        let isUp = false;
-        try {
-          // Melakukan HTTP request ringan tanpa menyimpan cache
-          await fetch(server.url, { mode: 'no-cors', cache: 'no-store' });
-          isUp = true;
-        } catch (error) {
-          isUp = false;
-        }
-        const ping = Date.now() - start;
-        updateUI(server.id, isUp, ping);
+        try { await fetch(s.url, { mode: 'no-cors' }); updateUI(s.id, true, Date.now() - start); }
+        catch { updateUI(s.id, false); }
       }
-      
-      // Update Jam
-      const now = new Date();
-      timeFooter.innerHTML = "Real-time Sync • " + now.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' }) + " WIB";
+      document.getElementById('time-footer').innerText = "Last sync: " + new Date().toLocaleTimeString();
     }
 
-    // 4. UPDATE HTML KARTU
-    function updateUI(id, isUp, ping) {
-      const badge = document.getElementById('badge-' + id);
-      const pingText = document.getElementById('ping-' + id);
-
-      if (isUp) {
-        badge.className = "status-badge online";
-        badge.innerHTML = '<div class="dot dot-online"></div> ONLINE';
-        pingText.innerHTML = `<svg class="ping-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Latensi: ${ping} ms`;
-      } else {
-        badge.className = "status-badge offline";
-        badge.innerHTML = '<div class="dot dot-offline"></div> OFFLINE';
-        pingText.innerHTML = `<svg class="ping-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Latensi: RTO`;
-      }
+    function updateUI(id, up, ping) {
+      const b = document.getElementById('badge-'+id), p = document.getElementById('ping-'+id);
+      b.className = "status-badge " + (up ? "online" : "offline");
+      b.innerText = up ? "ONLINE" : "OFFLINE";
+      p.innerText = up ? ping + " ms" : "RTO";
     }
 
-    // 5. KONTROL MODAL & COPY
-    function openModal(index) {
-      const server = servers[index];
-      document.getElementById('modalTitle').innerText = server.name;
-      document.getElementById('configText').innerText = server.vless;
-      currentConfigToCopy = server.vless;
+    function openModal(i) {
+      document.getElementById('modalTitle').innerText = servers[i].name;
+      document.getElementById('configText').innerText = servers[i].vless;
+      window.currentConfig = servers[i].vless;
       document.getElementById('configModal').classList.add('active');
     }
 
-    function closeModal() {
-      document.getElementById('configModal').classList.remove('active');
-    }
+    function closeModal() { document.getElementById('configModal').classList.remove('active'); }
 
     function copyConfig() {
-      navigator.clipboard.writeText(currentConfigToCopy).then(() => {
-        const toast = document.getElementById('toast');
-        toast.classList.add('show');
-        closeModal();
-        setTimeout(() => toast.classList.remove('show'), 3000);
-      }).catch(err => {
-        alert("Gagal menyalin. Silakan blok dan copy manual.");
-      });
+      const t = document.createElement("textarea"); t.value = window.currentConfig;
+      document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t);
+      alert("Berhasil disalin!"); closeModal();
     }
-
-    // Tutup modal jika area luar (overlay) diklik
-    document.getElementById('configModal').addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
-    });
-
-    // 6. JALANKAN PROGRAM UTAMA
-    initUI();
-    checkServers(); // Cek langsung saat pertama kali buka
-    setInterval(checkServers, 4000); // Ulangi pengecekan setiap 4 detik (4000ms)
-
+    
+    document.getElementById('configModal').onclick = (e) => { if(e.target.id==='configModal') closeModal(); };
+    check(); setInterval(check, 4000);
   </script>
 </body>
 </html>
