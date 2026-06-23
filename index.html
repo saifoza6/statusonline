@@ -2,26 +2,25 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Xray Status | Foza</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Node Status | Foza</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --bg-main: #020617; --card-bg: rgba(30, 41, 59, 0.45); --card-border: rgba(255, 255, 255, 0.08); --item-bg: rgba(15, 23, 42, 0.6); --text-primary: #f8fafc; --text-secondary: #94a3b8; --accent: #3b82f6; --success: #10b981; --error: #ef4444; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: radial-gradient(circle at top right, #1e1b4b, var(--bg-main) 40%); color: var(--text-primary); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-    .dashboard { width: 100%; max-width: 500px; background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--card-border); border-radius: 24px; padding: 32px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
-    .header { text-align: center; margin-bottom: 24px; }
-    .header h1 { font-size: 26px; font-weight: 700; background: linear-gradient(135deg, #60a5fa, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .uptime { font-size: 13px; color: var(--accent); font-weight: 500; margin-top: 8px; }
-    .node-list { display: flex; flex-direction: column; gap: 14px; }
-    .node-card { background: var(--item-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
-    .node-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+    :root { --bg: #020617; --card: #1e293b; --text: #f8fafc; --accent: #3b82f6; --success: #10b981; --error: #ef4444; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; }
+    .dashboard { width: 100%; max-width: 450px; }
+    .header { text-align: center; margin-bottom: 25px; }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .uptime { font-size: 28px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+    .node-card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .node-info { font-size: 14px; font-weight: 600; }
+    .ping { font-size: 12px; color: #94a3b8; }
+    .badge { font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; }
     .online { color: var(--success); } .offline { color: var(--error); }
-    .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; opacity:0; visibility:hidden; transition:0.3s; }
-    .modal-overlay.active { opacity:1; visibility:visible; }
-    .modal-box { background:#0f172a; padding:24px; border-radius:20px; width:90%; max-width:400px; }
-    .config-box { background:#020617; padding:12px; font-family:monospace; font-size:12px; color:#a5b4fc; word-break:break-all; border-radius:8px; margin:15px 0; max-height:100px; overflow-y:auto; }
+    .modal { position: fixed; bottom: 0; left: 0; width: 100%; background: #0f172a; padding: 25px; border-radius: 20px 20px 0 0; transform: translateY(100%); transition: 0.3s; z-index: 100; }
+    .modal.active { transform: translateY(0); }
+    .modal-msg { font-size: 13px; color: #fbbf24; margin-bottom: 10px; font-weight: 600; }
+    .config-box { background: #020617; padding: 15px; border-radius: 8px; font-size: 12px; word-break: break-all; margin: 5px 0 15px 0; max-height: 120px; overflow-y: auto; color: #a5b4fc; }
   </style>
 </head>
 <body>
@@ -29,75 +28,68 @@
   <div class="dashboard">
     <div class="header">
       <h1>Xray Node Status</h1>
-      <div class="uptime" id="uptime">Uptime: 00:00:00</div>
+      <div class="uptime" id="uptime">00:00:00</div>
     </div>
-    <div class="node-list" id="server-container"></div>
-    <div class="footer" style="text-align:center; margin-top:20px; font-size:12px; color:#666;" id="time-footer">Syncing...</div>
+    <div id="server-container"></div>
   </div>
 
-  <div class="modal-overlay" id="configModal">
-    <div class="modal-box">
-      <div id="modalTitle" style="font-weight:600">Nama Server</div>
-      <div class="config-box" id="configText"></div>
-      <button style="width:100%; padding:10px; border-radius:8px; border:none; background:#3b82f6; color:#fff; cursor:pointer" onclick="copyConfig()">Salin Link VLESS</button>
-    </div>
+  <div class="modal" id="configModal">
+    <div id="modalTitle" style="font-weight:600; margin-bottom:5px">Server Name</div>
+    <div class="modal-msg">⚠️ Gunakan aplikasi NekoBox agar koneksi tidak error.</div>
+    <div class="config-box" id="configText"></div>
+    <button style="width:100%; padding:12px; border-radius:8px; border:none; background:var(--accent); color:#fff; font-weight:600" onclick="copyConfig()">SALIN LINK VLESS</button>
   </div>
 
   <script>
     const servers = [
-      { id: "jp", name: "🇯🇵 Worker VPN JP", url: "https://vpn.foza.biz.id", vless: "vless://673d0bcb-a575-4a91-825c-f3252f8c7e3b@104.18.95.0:2083/?type=ws&security=tls&encryption=none&host=vpn.foza.biz.id&path=%2F#Worker%20VPN%20JP" },
-      { id: "id", name: "🇮🇩 PT Pusat Media Indonesia", url: "https://xray.foza.biz.id", vless: "vless://fc60147e-76b8-4bc5-b691-90b2da79e3d2@104.18.2.1:80/?type=ws&encryption=none&host=xray.foza.biz.id&path=%2F103.6.207.108-8080#PT%20Pusat%20Media%20Indonesia" }
+      { id: "jp", name: "🇯🇵 Worker JP", url: "https://vpn.foza.biz.id", vless: "vless://673d0bcb-a575-4a91-825c-f3252f8c7e3b@104.18.95.0:2083/?type=ws&security=tls&encryption=none&host=vpn.foza.biz.id&path=%2F#Worker%20VPN%20JP" },
+      { id: "sg", name: "🇸🇬 Worker SG", url: "https://vpn.foza.biz.id", vless: "vless://673d0bcb-a575-4a91-825c-f3252f8c7e3b@172.67.66.234:443/?type=ws&security=tls&encryption=none&host=vpn.foza.biz.id&path=%2F#Worker%20VPN%20SG" },
+      { id: "id", name: "🇮🇩 PT Pusat Media", url: "https://xray.foza.biz.id", vless: "vless://fc60147e-76b8-4bc5-b691-90b2da79e3d2@104.18.2.1:80/?type=ws&encryption=none&host=xray.foza.biz.id&path=%2F103.6.207.108-8080#PT%20Pusat%20Media" },
+      { id: "sg-o", name: "🇸🇬 Oracle SG", url: "https://xray.foza.biz.id", vless: "vless://fc60147e-76b8-4bc5-b691-90b2da79e3d2@172.67.73.39:80/?type=ws&encryption=none&host=xray.foza.biz.id&path=%2F168.138.165.174-443#Oracle%20SG" },
+      { id: "sg-a", name: "🇸🇬 Alibaba SG", url: "https://xray.foza.biz.id", vless: "vless://fc60147e-76b8-4bc5-b691-90b2da79e3d2@172.67.73.39:80/?type=ws&encryption=none&host=xray.foza.biz.id&path=%2F47.74.254.191-8900#Alibaba%20SG" }
     ];
 
-    // Uptime Logic
-    const startTime = Date.now();
-    function updateUptime() {
-      const diff = new Date(Date.now() - startTime);
-      document.getElementById('uptime').innerText = `Uptime: ${String(diff.getUTCHours()).padStart(2,'0')}:${String(diff.getUTCMinutes()).padStart(2,'0')}:${String(diff.getUTCSeconds()).padStart(2,'0')}`;
-    }
-    setInterval(updateUptime, 1000);
+    const start = Date.now();
+    setInterval(() => {
+      const d = new Date(Date.now() - start);
+      document.getElementById('uptime').innerText = `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}:${String(d.getUTCSeconds()).padStart(2,'0')}`;
+    }, 1000);
 
-    // Render & Ping Logic
     const container = document.getElementById('server-container');
     servers.forEach((s, i) => {
       container.innerHTML += `<div class="node-card" onclick="openModal(${i})">
-        <div><strong>${s.name}</strong><div id="ping-${s.id}" style="font-size:12px; color:#888">Checking...</div></div>
-        <div class="status-badge" id="badge-${s.id}">...</div>
+        <div><div class="node-info">${s.name}</div><div class="ping" id="p-${s.id}">Checking...</div></div>
+        <div class="badge" id="b-${s.id}">...</div>
       </div>`;
     });
 
     async function check() {
-      for (const s of servers) {
+      for(const s of servers) {
         const start = Date.now();
-        try { await fetch(s.url, { mode: 'no-cors' }); updateUI(s.id, true, Date.now() - start); }
-        catch { updateUI(s.id, false); }
+        try { await fetch(s.url, { mode: 'no-cors' }); update(s.id, true, Date.now()-start); }
+        catch { update(s.id, false); }
       }
-      document.getElementById('time-footer').innerText = "Last sync: " + new Date().toLocaleTimeString();
     }
-
-    function updateUI(id, up, ping) {
-      const b = document.getElementById('badge-'+id), p = document.getElementById('ping-'+id);
-      b.className = "status-badge " + (up ? "online" : "offline");
-      b.innerText = up ? "ONLINE" : "OFFLINE";
+    function update(id, up, ping) {
+      const b = document.getElementById('b-'+id), p = document.getElementById('p-'+id);
+      b.className = "badge " + (up ? "online" : "offline"); b.innerText = up ? "ONLINE" : "OFFLINE";
       p.innerText = up ? ping + " ms" : "RTO";
     }
 
     function openModal(i) {
       document.getElementById('modalTitle').innerText = servers[i].name;
       document.getElementById('configText').innerText = servers[i].vless;
-      window.currentConfig = servers[i].vless;
+      window.cc = servers[i].vless;
       document.getElementById('configModal').classList.add('active');
     }
-
-    function closeModal() { document.getElementById('configModal').classList.remove('active'); }
-
     function copyConfig() {
-      const t = document.createElement("textarea"); t.value = window.currentConfig;
+      const t = document.createElement("textarea"); t.value = window.cc;
       document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t);
-      alert("Berhasil disalin!"); closeModal();
+      alert("Disalin!"); document.getElementById('configModal').classList.remove('active');
     }
     
-    document.getElementById('configModal').onclick = (e) => { if(e.target.id==='configModal') closeModal(); };
+    // Klik area kosong modal untuk menutup
+    window.onclick = (e) => { if (e.target == document.getElementById('configModal')) document.getElementById('configModal').classList.remove('active'); };
     check(); setInterval(check, 4000);
   </script>
 </body>
