@@ -36,7 +36,7 @@
       overflow-x: hidden;
     }
 
-    .dashboard { width: 100%; max-width: 440px; margin-top: 10vh; }
+    .dashboard { width: 100%; max-width: 440px; margin-top: 8vh; }
 
     /* Header */
     .header { text-align: center; margin-bottom: 32px; position: relative; }
@@ -103,37 +103,44 @@
     /* Modal Backdrop Overlay */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(2, 6, 23, 0.4);
+      background: rgba(2, 6, 23, 0.6);
       backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       z-index: 99; opacity: 0; visibility: hidden;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.3s ease;
     }
     .modal-overlay.active { opacity: 1; visibility: visible; }
 
-    /* Modal Bottom Sheet */
-    .modal-sheet { 
-      position: fixed; bottom: 0; left: 0; width: 100%; 
-      background: #0b0f19; border-top: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 32px 24px 40px 24px; border-radius: 32px 32px 0 0; 
-      transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
-      z-index: 100; max-width: 500px; left: 50%; margin-left: -250px;
+    /* Modal Center Box (Pembaruan Posisi) */
+    .modal-box { 
+      position: fixed; 
+      top: 50%; left: 50%; 
+      transform: translate(-50%, -45%) scale(0.95); 
+      width: 90%; max-width: 400px;
+      background: #0b0f19; border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 24px; border-radius: 24px; 
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+      z-index: 100;
+      opacity: 0; visibility: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
     }
-    @media (max-width: 500px) { .modal-sheet { left: 0; margin-left: 0; } }
-    .modal-sheet.active { transform: translateY(0); }
+    .modal-box.active { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
     
-    .sheet-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 10px; margin: -16px auto 20px auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .btn-close { background: transparent; border: none; color: var(--text-dim); font-size: 26px; line-height: 1; cursor: pointer; transition: 0.2s; }
+    .btn-close:hover { color: var(--error); }
+    
     .modal-msg { font-size: 13px; color: #f59e0b; margin-bottom: 16px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
     
     .config-box { 
-      background: #030712; padding: 18px; border-radius: 18px; 
+      background: #030712; padding: 16px; border-radius: 16px; 
       font-family: 'Courier New', monospace; font-size: 12px; 
-      color: #818cf8; word-break: break-all; margin-bottom: 24px; 
+      color: #818cf8; word-break: break-all; margin-bottom: 20px; 
       border: 1px solid rgba(255,255,255,0.04); max-height: 110px; overflow-y: auto;
     }
     
     .btn-action { 
-      width: 100%; padding: 16px; border-radius: 16px; border: none; 
-      background: var(--accent); color: #fff; font-weight: 700; font-size: 15px;
+      width: 100%; padding: 14px; border-radius: 14px; border: none; 
+      background: var(--accent); color: #fff; font-weight: 700; font-size: 14px;
       cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
     }
     .btn-action:active { transform: scale(0.98); opacity: 0.9; }
@@ -154,6 +161,7 @@
 </head>
 <body>
 
+  <!-- DASHBOARD -->
   <div class="dashboard">
     <div class="header">
       <div class="uptime-label">System Live Uptime</div>
@@ -164,10 +172,13 @@
     <div class="footer" id="time-footer">Syncing network nodes...</div>
   </div>
 
+  <!-- MODAL LAYER (Sekarang Center/Tengah Layar) -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
-  <div class="modal-sheet" id="configModal">
-    <div class="sheet-handle"></div>
-    <div id="modalTitle" style="font-weight:800; font-size:19px; margin-bottom:6px; letter-spacing: -0.3px;">Server Config</div>
+  <div class="modal-box" id="configModal">
+    <div class="modal-header">
+      <div id="modalTitle" style="font-weight:800; font-size:18px; letter-spacing: -0.3px;">Server Config</div>
+      <button class="btn-close" onclick="closeModal()">&times;</button>
+    </div>
     <div class="modal-msg">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       Gunakan NekoBox agar koneksi lancar.
@@ -176,6 +187,7 @@
     <button class="btn-action" onclick="copyConfig()">SALIN CONFIG VLESS</button>
   </div>
 
+  <!-- CUSTOM TOAST -->
   <div class="toast" id="toast">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
     Config berhasil disalin!
@@ -190,12 +202,26 @@
       { id: "sg-a", name: "🇸🇬 Alibaba Cloud SG", url: "https://xray.foza.biz.id", vless: "vless://fc60147e-76b8-4bc5-b691-90b2da79e3d2@172.67.73.39:80/?type=ws&encryption=none&host=xray.foza.biz.id&path=%2F47.74.254.191-8900#Alibaba%20SG" }
     ];
 
-    // Uptime Engine
-    const startTime = Date.now();
+    // --- UPTIME ENGINE PERSISTEN (Tidak reset saat di-reload) ---
+    // Cek apakah perangkat sudah punya data startTime di LocalStorage
+    let startTime = localStorage.getItem('vpn_uptime_start');
+    if (!startTime) {
+      startTime = Date.now();
+      localStorage.setItem('vpn_uptime_start', startTime);
+    } else {
+      startTime = parseInt(startTime, 10);
+    }
+
     setInterval(() => {
-      const diff = new Date(Date.now() - startTime);
-      document.getElementById('uptime').innerText = `${String(diff.getUTCHours()).padStart(2,'0')}:${String(diff.getUTCMinutes()).padStart(2,'0')}:${String(diff.getUTCSeconds()).padStart(2,'0')}`;
+      // Menggunakan Math.floor total detik agar Jam (Hours) bisa menembus 24+
+      const totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+      const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      const s = String(totalSeconds % 60).padStart(2, '0');
+      
+      document.getElementById('uptime').innerText = `${h}:${m}:${s}`;
     }, 1000);
+    // -------------------------------------------------------------
 
     // Dom Render
     const container = document.getElementById('server-container');
@@ -258,7 +284,6 @@
       
       closeModal();
       
-      // Trigger Premium Toast Notif
       const toast = document.getElementById('toast');
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 2500);
