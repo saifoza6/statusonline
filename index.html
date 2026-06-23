@@ -4,40 +4,89 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Node Status | Foza</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root { --bg: #020617; --card: #1e293b; --text: #f8fafc; --accent: #3b82f6; --success: #10b981; --error: #ef4444; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; }
-    .dashboard { width: 100%; max-width: 450px; }
-    .header { text-align: center; margin-bottom: 25px; }
-    .header h1 { font-size: 22px; margin-bottom: 5px; }
-    .uptime { font-size: 28px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
-    .node-card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .node-info { font-size: 14px; font-weight: 600; }
-    .ping { font-size: 12px; color: #94a3b8; }
-    .badge { font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; }
-    .online { color: var(--success); } .offline { color: var(--error); }
-    .modal { position: fixed; bottom: 0; left: 0; width: 100%; background: #0f172a; padding: 25px; border-radius: 20px 20px 0 0; transform: translateY(100%); transition: 0.3s; z-index: 100; }
+    :root {
+      --bg: #05060f;
+      --glass: rgba(255, 255, 255, 0.03);
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #6366f1;
+      --text: #ffffff;
+      --dim: #94a3b8;
+    }
+
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      margin: 0; 
+      padding: 20px; 
+      display: flex; 
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .dashboard { width: 100%; max-width: 420px; }
+
+    .header { text-align: center; margin-bottom: 35px; }
+    .header h1 { font-size: 20px; font-weight: 800; opacity: 0.8; letter-spacing: -0.5px; }
+    .uptime { font-size: 42px; font-weight: 800; color: var(--accent); margin-top: 10px; font-variant-numeric: tabular-nums; }
+    .uptime-label { font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; }
+
+    .node-card { 
+      background: var(--glass); 
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      border-radius: 20px; 
+      padding: 20px; 
+      margin-bottom: 14px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .node-card:active { transform: scale(0.97); }
+
+    .node-info { font-weight: 600; font-size: 15px; }
+    .ping { font-size: 12px; color: var(--dim); margin-top: 4px; }
+    .badge { font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 50px; background: rgba(0,0,0,0.2); }
+    .online { color: #10b981; border: 1px solid #10b98133; }
+    .offline { color: #f43f5e; border: 1px solid #f43f5e33; }
+
+    /* Modal Modern */
+    .modal { 
+      position: fixed; bottom: 0; left: 0; width: 100%; 
+      background: #0f111a; border-top: 1px solid var(--border);
+      padding: 30px; border-radius: 30px 30px 0 0; 
+      transform: translateY(100%); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+      z-index: 100;
+    }
     .modal.active { transform: translateY(0); }
-    .modal-msg { font-size: 13px; color: #fbbf24; margin-bottom: 10px; font-weight: 600; }
-    .config-box { background: #020617; padding: 15px; border-radius: 8px; font-size: 12px; word-break: break-all; margin: 5px 0 15px 0; max-height: 120px; overflow-y: auto; color: #a5b4fc; }
+    .modal-msg { font-size: 12px; color: #fbbf24; margin-bottom: 15px; font-weight: 600; }
+    .config-box { 
+      background: #05060f; padding: 18px; border-radius: 16px; 
+      font-family: 'Courier New', monospace; font-size: 12px; 
+      color: #818cf8; word-break: break-all; margin-bottom: 20px; 
+      border: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
 
   <div class="dashboard">
     <div class="header">
-      <h1>Xray Node Status</h1>
+      <div class="uptime-label">System Uptime</div>
       <div class="uptime" id="uptime">00:00:00</div>
+      <h1>Xray Node Status</h1>
     </div>
     <div id="server-container"></div>
   </div>
 
   <div class="modal" id="configModal">
-    <div id="modalTitle" style="font-weight:600; margin-bottom:5px">Server Name</div>
-    <div class="modal-msg">⚠️ Gunakan aplikasi NekoBox agar koneksi tidak error.</div>
+    <div id="modalTitle" style="font-weight:700; font-size:18px; margin-bottom:8px">Server Name</div>
+    <div class="modal-msg">⚠️ Gunakan NekoBox agar koneksi lancar.</div>
     <div class="config-box" id="configText"></div>
-    <button style="width:100%; padding:12px; border-radius:8px; border:none; background:var(--accent); color:#fff; font-weight:600" onclick="copyConfig()">SALIN LINK VLESS</button>
+    <button style="width:100%; padding:16px; border-radius:14px; border:none; background:var(--accent); color:#fff; font-weight:700; cursor:pointer" onclick="copyConfig()">SALIN LINK VLESS</button>
   </div>
 
   <script>
@@ -49,6 +98,7 @@
       { id: "sg-a", name: "🇸🇬 Alibaba SG", url: "https://xray.foza.biz.id", vless: "vless://fc60147e-76b8-4bc5-b691-90b2da79e3d2@172.67.73.39:80/?type=ws&encryption=none&host=xray.foza.biz.id&path=%2F47.74.254.191-8900#Alibaba%20SG" }
     ];
 
+    // Uptime Logic
     const start = Date.now();
     setInterval(() => {
       const d = new Date(Date.now() - start);
@@ -65,8 +115,8 @@
 
     async function check() {
       for(const s of servers) {
-        const start = Date.now();
-        try { await fetch(s.url, { mode: 'no-cors' }); update(s.id, true, Date.now()-start); }
+        const t = Date.now();
+        try { await fetch(s.url, { mode: 'no-cors' }); update(s.id, true, Date.now()-t); }
         catch { update(s.id, false); }
       }
     }
@@ -85,10 +135,9 @@
     function copyConfig() {
       const t = document.createElement("textarea"); t.value = window.cc;
       document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t);
-      alert("Disalin!"); document.getElementById('configModal').classList.remove('active');
+      alert("Link disalin!"); document.getElementById('configModal').classList.remove('active');
     }
     
-    // Klik area kosong modal untuk menutup
     window.onclick = (e) => { if (e.target == document.getElementById('configModal')) document.getElementById('configModal').classList.remove('active'); };
     check(); setInterval(check, 4000);
   </script>
